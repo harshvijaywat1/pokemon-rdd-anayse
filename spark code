@@ -1,0 +1,31 @@
+val pok = sc.textFile("/home/harsh/Desktop/pokemon rdd analyse/pokemon.csv")
+pok.collect.foreach(println)
+
+val head = pok.first()
+val nohead = pok.filter(line => !line.equals(head))
+nohead.collect.foreach(println)
+
+println("No. of partition =" + nohead.partitions.size)
+
+val waterrdd = nohead.filter(line => line.contains("Water"))
+waterrdd.collect().foreach(println)
+
+val firerdd = nohead.filter(line => line.contains("Fire"))
+firerdd.collect().foreach(println)
+
+waterrdd.count()
+firerdd.count()
+
+val defenceList = nohead.map(_.split(",")).map(x => (x(7).toDouble))
+println("Highest defence:" + defenceList.max())
+
+val defpok = nohead.map(x => x.split(",")).map(x => (x(7).toDouble, x(1)))
+defpok.collect.foreach(println)
+val maxdefp = defpok.groupByKey.takeOrdered(1)(Ordering[Double].reverse.on(_._1))
+maxdefp.foreach(println)
+
+val mindef = defenceList.distinct.sortBy(x => x.toDouble, true, 1)
+mindef.take(5).foreach(println)
+
+val mindefp = defpok.groupByKey.takeOrdered(1)(Ordering[Double].on(_._1))
+mindefp.foreach(println)
